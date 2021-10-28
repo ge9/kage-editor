@@ -1,0 +1,3 @@
+[submodule "kage-engine-npm"]
+	path = kage-engine-npm
+	url = https://github.com/ge9/kage-engine-npm

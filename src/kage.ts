@@ -1,6 +1,6 @@
 import memoizeOne from 'memoize-one';
 
-import { Kage, Polygons } from '@kurgm/kage-engine';
+import { Kage, Polygons } from '@ge9/kage-engine-2';
 import { Glyph, unparseGlyphLine } from './kageUtils/glyph';
 import { StretchParam } from './kageUtils/stretchparam';
 
