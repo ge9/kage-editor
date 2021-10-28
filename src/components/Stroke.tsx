@@ -9,7 +9,7 @@ export interface StrokeComponentProps {
 const StrokeComponent = (props: StrokeComponentProps) => (
   <>
     {props.polygons.array.map((polygon, i) => (
-      <polygon key={i} points={polygon.array.map(({ x, y }) => `${x},${y} `).join("")} />
+      <path key={i} d={polygon.get_sub_path_svg()} />
     ))}
   </>
 );
