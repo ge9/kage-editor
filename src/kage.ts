@@ -1,6 +1,7 @@
 import memoizeOne from 'memoize-one';
 
-import { Kage, Polygons } from '@ge9/kage-engine-2';
+import { Kage, Polygons, KShotai } from '@ge9/kage-engine-2';
+
 import { Glyph, unparseGlyphLine } from './kageUtils/glyph';
 import { StretchParam } from './kageUtils/stretchparam';
 
@@ -9,7 +10,7 @@ import { editorActions } from './actions/editor';
 
 import { getSource } from './callapi';
 
-export type KShotai = Kage["kShotai"];
+export { KShotai };
 
 const kage_ = new Kage();
 
