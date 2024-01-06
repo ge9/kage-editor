@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import ReactModal from 'react-modal';
 import { useTranslation } from 'react-i18next';
 
-import { displayActions } from '../actions/display';
+import { displayActions, ShowCenterLine } from '../actions/display';
 import { AppState } from '../reducers';
 import { KShotai } from '../kage';
 import { XorMaskType, xorMaskTypes } from '../xorMask';
@@ -41,13 +41,13 @@ const OptionModal = () => {
   const handleShotaiChange = useCallback((evt: React.ChangeEvent<HTMLSelectElement>) => {
     dispatch(displayActions.setShotai(+evt.currentTarget.value as KShotai));
   }, [dispatch]);
-  const handleStrokeCenterLineChange = useCallback((evt: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch(displayActions.setStrokeCenterLineDisplay(evt.currentTarget.checked));
+  const handleStrokeCenterLineChange = useCallback((evt: React.ChangeEvent<HTMLSelectElement>) => {
+    dispatch(displayActions.setStrokeCenterLineDisplay(+evt.currentTarget.value as ShowCenterLine));
   }, [dispatch]);
   const handleXorMaskTypeChange = useCallback((evt: React.ChangeEvent<HTMLSelectElement>) => {
     dispatch(displayActions.setXorMaskType(evt.currentTarget.value as XorMaskType));
   }, [dispatch]);
-  
+
   const { t, i18n } = useTranslation();
   const handleLanguageChange = useCallback((evt: React.ChangeEvent<HTMLSelectElement>) => {
     i18n.changeLanguage(evt.currentTarget.value);
@@ -68,8 +68,9 @@ const OptionModal = () => {
             {t('enable grid')}
           </label>
         </div>
-        <div>
-          {t('grid origin x')} <input
+        <div className="grid-option">
+          <div>{t('grid origin x')}</div>
+          <input
             type="number"
             value={grid.originX}
             min={0}
@@ -77,8 +78,9 @@ const OptionModal = () => {
             onChange={handleGridOriginXChange}
             disabled={!grid.display}
           />
-          {' '}
-          {t('grid origin y')} <input
+
+          <div>{t('grid origin y')}</div>
+          <input
             type="number"
             value={grid.originY}
             min={0}
@@ -86,9 +88,9 @@ const OptionModal = () => {
             onChange={handleGridOriginYChange}
             disabled={!grid.display}
           />
-        </div>
-        <div>
-          {t('grid spacing x')} <input
+
+          <div>{t('grid spacing x')}</div>
+          <input
             type="number"
             value={grid.spacingX}
             min={2}
@@ -96,8 +98,9 @@ const OptionModal = () => {
             onChange={handleGridSpacingXChange}
             disabled={!grid.display}
           />
-          {' '}
-          {t('grid spacing y')} <input
+
+          <div>{t('grid spacing y')}</div>
+          <input
             type="number"
             value={grid.spacingY}
             min={2}
@@ -107,27 +110,28 @@ const OptionModal = () => {
           />
         </div>
       </fieldset>
-      <div>
-        {t('glyph font style')} <select
+      <div className="general-option">
+        <div>{t('glyph font style')}</div>
+        <select
           value={shotai}
           onChange={handleShotaiChange}
         >
-          <option value={0}>{t('mincho style')}</option>
-          <option value={1}>{t('gothic style')}</option>
+          <option value={KShotai.kMincho}>{t('mincho style')}</option>
+          <option value={KShotai.kGothic}>{t('gothic style')}</option>
         </select>
-      </div>
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            checked={showStrokeCenterLine}
-            onChange={handleStrokeCenterLineChange}
-          />
-          {t('show stroke center line')}
-        </label>
-      </div>
-      <div>
-        {t('negative mask type')} <select
+
+        <div>{t('show stroke center line')}</div>
+        <select
+          value={showStrokeCenterLine}
+          onChange={handleStrokeCenterLineChange}
+        >
+          <option value={ShowCenterLine.none}>{t('show stroke center line none')}</option>
+          <option value={ShowCenterLine.selection}>{t('show stroke center line selection')}</option>
+          <option value={ShowCenterLine.always}>{t('show stroke center line always')}</option>
+        </select>
+
+        <div>{t('negative mask type')}</div>
+        <select
           value={xorMaskType}
           onChange={handleXorMaskTypeChange}
         >
@@ -135,9 +139,9 @@ const OptionModal = () => {
             <option key={maskType} value={maskType}>{t(`negative mask type ${maskType}`)}</option>
           ))}
         </select>
-      </div>
-      <div>
-        {t('display language')} <select
+
+        <div>{t('display language')}</div>
+        <select
           value={i18n.language}
           onChange={handleLanguageChange}
         >
@@ -148,7 +152,7 @@ const OptionModal = () => {
           <option value="zh-Hant">繁體中文</option>
         </select>
       </div>
-      <div>
+      <div className="close-option">
         <button onClick={handleRequestClose}>{t('close modal')}</button>
       </div>
     </ReactModal>

@@ -18,7 +18,12 @@
   pointer-events: none;
 }
 
+.strokes-selected path,
 .strokes-selected polygon {
   fill: #cc0000;
   stroke: none;
+}
+
+.movable-stroke {
+  cursor: move;
 }

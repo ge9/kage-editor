@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
-import { createSelector } from 'reselect';
+import { createSelector } from '@reduxjs/toolkit';
 import { useTranslation } from 'react-i18next';
 
 import { editorActions } from '../actions/editor';
@@ -290,7 +290,7 @@ const SelectionInfo = () => {
                   {t(`operation type ${ReflectRotateType[opType]}`)}
                 </option>
               ))}
-              {!reflectRotateTypes.includes(reflectRotateInfo.opType) && (
+              {!reflectRotateTypes.includes(reflectRotateInfo.opType as any) && (
                 <option value={reflectRotateInfo.opType} />
               )}
             </select>

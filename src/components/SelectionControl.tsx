@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { createSelector } from 'reselect';
+import { createSelector } from '@reduxjs/toolkit';
 
 import { dragActions, RectPointPosition } from '../actions/drag';
 import { AppState } from '../reducers';
@@ -26,6 +26,7 @@ interface ControlPointSpec {
 interface SelectionControlSpec {
   rectControl: RectControl | null;
   pointControl: ControlPointSpec[];
+  auxiliaryLines: [number, number, number, number][];
 }
 
 const selectionControlSelector = createSelector(
@@ -35,7 +36,7 @@ const selectionControlSelector = createSelector(
   ],
   (glyph, selection): SelectionControlSpec => {
     if (selection.length === 0) {
-      return { rectControl: null, pointControl: [] };
+      return { rectControl: null, pointControl: [], auxiliaryLines: [] };
     }
     if (selection.length > 1) {
       const selectedStrokes = selection.map((index) => glyph[index]);
@@ -46,6 +47,7 @@ const selectionControlSelector = createSelector(
           coords: bbx,
         },
         pointControl: [],
+        auxiliaryLines: [],
       };
     }
     const selectedStroke = glyph[selection[0]];
@@ -64,6 +66,7 @@ const selectionControlSelector = createSelector(
             ],
           },
           pointControl: [],
+          auxiliaryLines: [],
         };
       case 1:
       case 2:
@@ -79,9 +82,9 @@ const selectionControlSelector = createSelector(
           });
           let className = '';
           if (matchType === MatchType.match) {
-              className = 'match';
+            className = 'match';
           } else if (matchType === MatchType.online) {
-              className = 'online';
+            className = 'online';
           }
 
           pointControl.push({
@@ -90,16 +93,42 @@ const selectionControlSelector = createSelector(
             className,
           });
         }
-        return { rectControl: null, pointControl };
+
+        const auxiliaryLines: [number, number, number, number][] = [];
+        if (selectedStroke.value[0] === 2 || selectedStroke.value[0] === 6) {
+          auxiliaryLines.push([
+            selectedStroke.value[3],
+            selectedStroke.value[4],
+            selectedStroke.value[5],
+            selectedStroke.value[6],
+          ]);
+        }
+        if (selectedStroke.value[0] === 2 || selectedStroke.value[0] === 7) {
+          auxiliaryLines.push([
+            selectedStroke.value[5],
+            selectedStroke.value[6],
+            selectedStroke.value[7],
+            selectedStroke.value[8],
+          ]);
+        }
+        if (selectedStroke.value[0] === 6 || selectedStroke.value[0] === 7) {
+          auxiliaryLines.push([
+            selectedStroke.value[7],
+            selectedStroke.value[8],
+            selectedStroke.value[9],
+            selectedStroke.value[10],
+          ]);
+        }
+        return { rectControl: null, pointControl, auxiliaryLines };
       }
       default:
-        return { rectControl: null, pointControl: [] };
+        return { rectControl: null, pointControl: [], auxiliaryLines: [] };
     }
   }
 );
 
 const SelectionControl = () => {
-  const { rectControl, pointControl } = useSelector(selectionControlSelector);
+  const { rectControl, pointControl, auxiliaryLines } = useSelector(selectionControlSelector);
 
   const dispatch = useDispatch();
   const handleMouseDownRectControl = useCallback((evt: React.MouseEvent, position: RectPointPosition) => {
@@ -127,6 +156,18 @@ const SelectionControl = () => {
     (evt: React.MouseEvent) => handleMouseDownRectControl(evt, RectPointPosition.southeast),
     [handleMouseDownRectControl]
   );
+  const handleMouseDownSouthwestPoint = useCallback(
+    (evt: React.MouseEvent) => handleMouseDownRectControl(evt, RectPointPosition.southwest),
+    [handleMouseDownRectControl]
+  );
+  const handleMouseDownNortheastPoint = useCallback(
+    (evt: React.MouseEvent) => handleMouseDownRectControl(evt, RectPointPosition.northeast),
+    [handleMouseDownRectControl]
+  );
+  const handleMouseDownNorthwestPoint = useCallback(
+    (evt: React.MouseEvent) => handleMouseDownRectControl(evt, RectPointPosition.northwest),
+    [handleMouseDownRectControl]
+  );
 
   const handleMouseDownPointControls = useMemo(() => {
     return pointControl.map((_control, pointIndex) => (evt: React.MouseEvent) => {
@@ -134,6 +175,13 @@ const SelectionControl = () => {
       evt.stopPropagation();
     });
   }, [dispatch, pointControl]);
+
+  const verticallyFlipped = !!rectControl && rectControl.coords[0] > rectControl.coords[2];
+  const horizontallyFlipped = !!rectControl && rectControl.coords[1] > rectControl.coords[3];
+  const controlPointNorthClassName = verticallyFlipped ? 'south' : 'north';
+  const controlPointSouthClassName = verticallyFlipped ? 'north' : 'south';
+  const controlPointWestClassName = horizontallyFlipped ? 'east' : 'west';
+  const controlPointEastClassName = horizontallyFlipped ? 'west' : 'east';
 
   return <>
     {rectControl && <>
@@ -147,34 +195,55 @@ const SelectionControl = () => {
       <ControlPoint
         x={(rectControl.coords[0] + rectControl.coords[2]) / 2}
         y={rectControl.coords[1]}
-        className='north'
+        className={controlPointNorthClassName}
         handleMouseDown={handleMouseDownNorthPoint}
       />
       <ControlPoint
         x={rectControl.coords[0]}
         y={(rectControl.coords[1] + rectControl.coords[3]) / 2}
-        className='west'
+        className={controlPointWestClassName}
         handleMouseDown={handleMouseDownWestPoint}
       />
       <ControlPoint
         x={(rectControl.coords[0] + rectControl.coords[2]) / 2}
         y={rectControl.coords[3]}
-        className='south'
+        className={controlPointSouthClassName}
         handleMouseDown={handleMouseDownSouthPoint}
       />
       <ControlPoint
         x={rectControl.coords[2]}
         y={(rectControl.coords[1] + rectControl.coords[3]) / 2}
-        className='east'
+        className={controlPointEastClassName}
         handleMouseDown={handleMouseDownEastPoint}
       />
       <ControlPoint
         x={rectControl.coords[2]}
         y={rectControl.coords[3]}
-        className='southeast'
+        className={controlPointSouthClassName + controlPointEastClassName}
         handleMouseDown={handleMouseDownSoutheastPoint}
       />
+      <ControlPoint
+        x={rectControl.coords[0]}
+        y={rectControl.coords[3]}
+        className={controlPointSouthClassName + controlPointWestClassName}
+        handleMouseDown={handleMouseDownSouthwestPoint}
+      />
+      <ControlPoint
+        x={rectControl.coords[2]}
+        y={rectControl.coords[1]}
+        className={controlPointNorthClassName + controlPointEastClassName}
+        handleMouseDown={handleMouseDownNortheastPoint}
+      />
+      <ControlPoint
+        x={rectControl.coords[0]}
+        y={rectControl.coords[1]}
+        className={controlPointNorthClassName + controlPointWestClassName}
+        handleMouseDown={handleMouseDownNorthwestPoint}
+      />
     </>}
+    {auxiliaryLines.map((points, index) => (
+      <path className="auxiliary-lines" key={index} d={'M ' + points.join(' ')} />
+    ))}
     {pointControl.map(({ x, y, className }, index) => (
       <ControlPoint
         key={index}
